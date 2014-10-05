@@ -66,7 +66,7 @@
 
 
 \Name{Bruce Yan (byan@hmc.edu)}
-\DeterLabID{hmc125ah, hmc125-ANGELA}
+\DeterLabID{hmc125ah, hmc125-aj}
 \Workedwith{Angela Zhou}
 
 \Problem{1 - Group Project: Fast, Reliable File Transfer}
@@ -101,9 +101,29 @@ $ns rtproto Static
 # Go!
 $ns run
 \end{lstlisting}
-\item a
-\item b
-\item c
+\item At the beginning, we did a \texttt{ping} between the two nodes and we received the following delay:
+\begin{lstlisting}
+64 bytes from 10.1.1.2: icmp_seq=27 ttl=64 time=100.386 ms
+64 bytes from 10.1.1.2: icmp_seq=28 ttl=64 time=100.420 ms
+64 bytes from 10.1.1.2: icmp_seq=29 ttl=64 time=100.324 ms
+64 bytes from 10.1.1.2: icmp_seq=30 ttl=64 time=100.365 ms
+\end{lstlisting}
+\item Once the experiment started, we used the website to set the delay on the link to zero. The RTT delay between the nodes are now:
+\begin{lstlisting}
+64 bytes from 10.1.1.2: icmp_seq=31 ttl=64 time=0.324 ms
+64 bytes from 10.1.1.2: icmp_seq=32 ttl=64 time=0.358 ms
+64 bytes from 10.1.1.2: icmp_seq=33 ttl=64 time=0.387 ms
+64 bytes from 10.1.1.2: icmp_seq=34 ttl=64 time=0.302 ms
+\end{lstlisting}
+\item The delay appears to be 0.3345 ms.  Using \texttt{iperf -c nodeb -u -p 5001 -b 200M -i 10 -t 60} to test the bandwidth, we have an average of 95.6 Mbits/sec over 6 runs. The Bandwidth delay product is 3.19 Kbits.
+\item Explain briefly what the above commands do.  \texttt{dd if=/dev/urandom of=data.bin bs=1m count=200}.  So \texttt{dd} is standard linux utility that copies information from stdin to stdout..  Here, \texttt{if} is where we are reading the \texttt{/dev/urandom} file from and we are reading it out to \texttt{of} file called \texttt{data.bin}.  \texttt{bs}, which is the block size of both input and output files, is set to 1 megabyte. \texttt{count} means copy only 200 input blocks.
+\item We had to change the ownership on both sides by using the following command: \texttt{sudo chown hmc125ah:HMCCS125 /mnt/data.bin} and \texttt{sudo chown hmc125ah:HMCCS125 /mnt}.  We used the command \texttt{sudo scp data.bin hmc125ah@nodea:/mnt} to copy from nodeB to nodeA.
+\item What transfer throughput do you get?  Based on 6 trials, we get a transfer throughput of 11.1MB/s using \texttt{scp}.
+\item If we increased the delay from 0ms to 25ms on DETER website, we saw an immediate increase in transfer time.  The average throughput dropped to 900KB/s.  Increasing the delay from 25ms to 75ms on DETER website, the average throughput dropped to be about 300KB/s.  Further increasing the delay from 75ms to 125ms, the throughput dropped to be about 186KB/s.  \texttt{scp} transfer performance does not appear to be easily improved.  We tried a variety of \texttt{scp} parameters and they did not seem to have any effect.
+\item It does appear that \texttt{scp} has some limitations when transferring file over ssh.  We are guessing that the TCP window size cannot be altered.
+\item We graphed the result of the throughput transfer vs loss, which can be seen below. It does not seem too extreme since TCP has to check every packet every time it transfers something.  We believe the reason this happens is because every time data is filled in the TCP window, TCP has the property of auto-checking the integrity of all the packets before sending it off.  If there's significant loss, then the transfer speed will be severely impacted.  
+$$\includegraphics[width=4.5in]{graph-throughput-vs-loss}$$
+\item Per Verizon Enterprise Solutions (from Google), the average round-trip transatlantic latency between NY and London is approximately 90ms.  It is also stated that roundtrip latency within North America is 45ms.  Let's just add 30ms of latency for the distance between London and Switzerland.  This total roundtrip is: 165ms.  \\ \\ We would guess the CERN physicist will NOT be asking us for data considering the huge latency.  We could potentially help him, but it would just be slow, considering our CERN physicist friend may need a lot of data.  If we were to help him, we may need another method to transfer files, such as using distributed file systems or Cloud solutions.
 \end{itemize}
 
 \newpage
