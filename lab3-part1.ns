@@ -1,0 +1,27 @@
+# lab3-part1.ns
+
+# This is a simple ns script. Comments start with #.
+set ns [new Simulator]
+source tb_compat.tcl
+
+# Define the 4 nodes in the topology
+set nodeA [$ns node]
+set nodeB [$ns node]
+
+# Define the link and the LAN that connect the nodes
+# This sets the link speed between nodeA and nodeB
+# There is a 25ms round-trip delay
+set link0 [$ns duplex-link $nodeB $nodeA 100Mb 50ms DropTail]
+
+# Set the OS to Ubuntu1204-64-STD (modern)
+tb-set-node-os $nodeA FBSD9-64-STD
+tb-set-node-os $nodeB FBSD9-64-STD
+
+# Enable routing (static) between all the nodes
+$ns rtproto Static
+
+# Instruct the simulator to start
+# Go!
+$ns run
+
+# Make sure to check "Swap in Immediately"
