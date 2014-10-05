@@ -100,57 +100,35 @@ $ns rtproto Static
 # Instruct the simulator to start
 # Go!
 $ns run
-
-# Make sure to check "Swap in Immediately"
 \end{lstlisting}
 \item a
 \item b
 \item c
 \end{itemize}
 
-
-A copy of the NS file used to create this experiment can be found below:
-\begin{lstlisting}
-# Tutorial.ns
-
-# This is a simple ns script. Comments start with #.
-set ns [new Simulator]
-source tb_compat.tcl
-
-# Define the 4 nodes in the topology
-set nodeA [$ns node]
-set nodeB [$ns node]
-
-# Define the link and the LAN that connect the nodes
-# This sets the link speed between nodeA and nodeB
-# There is a 25ms round-trip delay
-set link0 [$ns duplex-link $nodeB $nodeA 1Mb 25ms DropTail]
-
-# Set the OS to Ubuntu1204-64-STD (modern)
-tb-set-node-os $nodeA FBSD9-64-STD
-tb-set-node-os $nodeB FBSD9-64-STD
-
-# Enable routing (static) between all the nodes
-$ns rtproto Static
-
-# Instruct the simulator to start
-# Go!
-$ns run
-
-# Make sure to check "Swap in Immediately"
-\end{lstlisting}
 \newpage
 
 
-\Problem{2 - Gigabit links}
+\Problem{2 - File Transfer Utility}
+As we've learned above, TCP, while totally reliable and robust, doesn't always give us good throughput. In this section you?ll design a IP based file-transfer utility. The design and implementation of the utility is up to your group, however it must full-fill only three requirements: it must use IP (so it can be routed), it must transfer the file reliably (with no errors) and it must be implemented with a command-line interface similar to \texttt{scp}.
+
+The link speed between the sender and receiver must be \textbf{100Mbps} and the test file size must be at least \textbf{1GBytes}. You should emulate the delay and the loss rate of the link using the delay node. You should test your system under various different conditions. However two settings that you must expose your system for the assignment are:
 \begin{itemize}
 \itemsep0em
-\item I used \texttt{ping} to indeed verify the average RRT appears to be around 0.2 ms.
-\item Using TCP, the bandwidth appears to be around 938 Mbits/s.  Using UDP, the speed appears to be 800 Mbits/s. 
-\item The default window size is set to 64k.  In most cases, the default window size will be fine, seeing as it's sufficiently small.  However, in some cases, when the data that is being sent over is much less than the window size, the data won't be sent over by the transmission simply because the pipe is not yet full.  This will cause delay in the transmission.  Thus, a smaller window size is recommended.
-\item Using window size might be a good way to imitative delay, but I'm not sure if it will scale well.  As mentioned previously, if the window size is too big, then the server will have to wait for the entire pipe to fill up before sending the data over.  However, once the data is sent over, it gets sent over.  There's no delay in that process.  So having a variable window size might be good to simulate delay, but it doesn't appear to scale really well.
-\item When setting the TCP throughput to be very small (i.e. too small), it starts to affect the overall TCP throughput.  According to my tests, when I set both the server and the client window size to be too small, the throughput reduced to nearly 400 Mbits/s.
-\item With gigabit links,  the greater the delay, the more data we lose.  It appears that a lot of bandwidth is not utilized efficiently.  The lesser the delay, the better in terms of throughput performance and efficiency.  I personally would not be happy with a 1GB DSL connection knowing I can only control the receive window size, especially if the server is on the other side of the country.
+\item The Delay (RTT) of 10ms with the Loss rate of 1\%
+\item The Delay (RTT) of 200ms with the Loss rate of 20\%
+\end{itemize}
+Describe, in detail, the concept(s) behind your file transfer utility, results, and the analysis in the document that must be submitted on October 9th by 2pm. Also, on October 9th and 14th we will have presentations from each group. The presentations will give details on how you solved the problems, problems you encountered and the results you were able to obtain. Some hints:
+\begin{itemize}
+\itemsep0em
+\item There are several closed and open source projects out there that do this. They typically use UDP at their base. You may use them as inspiration, however the end work must be your own. You must use UDP and only UDP for the transport of the file data. However, you may use TCP for control or metadata, but all of the file data, including retransmissions, must use UDP.
+\item You can implement the program in any language you'd like (C, C++, Java, Python, Ruby, etc.) as long as it works on the DETER nodes, and your submission comes with clear, concise instructions on how to build and test your program.
+\item Think about why \texttt{scp} has issues. Identify these weaknesses as inspiration for solving the problem. Think about selective re-transmission, parallel flows, forward error correction...
+\item Learn how to use the following UNIX tools, they are your friends: \texttt{tcpdump, tcpreplay, nc (aka netcat), nmap, netstat, iperf}
+\item There will be a prize for the team that achieves the highest throughput on the \textbf{200ms, 20\%} test case!
+\item You may need to learn about network programming on UNIX using sockets, and/or \texttt{libpcap}. See: \\
+http://beej.us/guide/bgnet/\\http://www.prasannatech.net/2008/07/socket-programming-tutorial.html\\http://gnosis.cx/publish/programming/sockets2.html
+\item To measure the throughput achieved, the \texttt{time} utility will be used. Familiarize yourself with this utility and understand how to use it to measure the total throughput achieved by your FTP utility.
 \end{itemize}
 
 
