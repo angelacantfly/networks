@@ -130,7 +130,7 @@ $$\includegraphics[width=4.5in]{graph-throughput-vs-loss}$$
 
 
 \Problem{2 - File Transfer Utility}
-As we've learned above, TCP, while totally reliable and robust, doesn't always give us good throughput. In this section you?ll design a IP based file-transfer utility. The design and implementation of the utility is up to your group, however it must full-fill only three requirements: it must use IP (so it can be routed), it must transfer the file reliably (with no errors) and it must be implemented with a command-line interface similar to \texttt{scp}.
+As we've learned above, TCP, while totally reliable and robust, doesn't always give us good throughput. In this section you'll design a IP based file-transfer utility. The design and implementation of the utility is up to your group, however it must full-fill only three requirements: it must use IP (so it can be routed), it must transfer the file reliably (with no errors) and it must be implemented with a command-line interface similar to \texttt{scp}.
 
 The link speed between the sender and receiver must be \textbf{100Mbps} and the test file size must be at least \textbf{1GBytes}. You should emulate the delay and the loss rate of the link using the delay node. You should test your system under various different conditions. However two settings that you must expose your system for the assignment are:
 \begin{itemize}
@@ -147,7 +147,9 @@ Describe, in detail, the concept(s) behind your file transfer utility, results, 
 \item Learn how to use the following UNIX tools, they are your friends: \texttt{tcpdump, tcpreplay, nc (aka netcat), nmap, netstat, iperf}
 \item There will be a prize for the team that achieves the highest throughput on the \textbf{200ms, 20\%} test case!
 \item You may need to learn about network programming on UNIX using sockets, and/or \texttt{libpcap}. See: \\
-http://beej.us/guide/bgnet/\\http://www.prasannatech.net/2008/07/socket-programming-tutorial.html\\http://gnosis.cx/publish/programming/sockets2.html
+http://beej.us/guide/bgnet/\\
+http://www.prasannatech.net/2008/07/socket-programming-tutorial.html\\
+http://gnosis.cx/publish/programming/sockets2.html
 \item To measure the throughput achieved, the \texttt{time} utility will be used. Familiarize yourself with this utility and understand how to use it to measure the total throughput achieved by your FTP utility.
 \end{itemize}
 
