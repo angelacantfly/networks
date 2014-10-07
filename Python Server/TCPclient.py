@@ -2,6 +2,7 @@
 import socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect(("localhost", 5005))
+sendFile = open('sample.txt', 'r')
 while 1:
     data = client_socket.recv(512)
     if ( data == 'q' or data == 'Q'):
@@ -9,11 +10,15 @@ while 1:
         break;
     else:
         print "RECIEVED:" , data
-        data = raw_input ( "SEND( TYPE q or Q to Quit):" )
-        if (data <> 'Q' and data <> 'q'):
-            client_socket.send(data)
-        else:
-            client_socket.send(data)
+        dataServer = raw_input ( "SEND( TYPE q or Q to Quit):" )
+        dataServer = sendFile.read(512)
+        if (dataServer == 'Q' and dataServer == 'q'):
+            client_socket.send(dataServer)
             client_socket.close()
-            break;
-            
+            print "Closing"
+            break;        
+        else:
+            client_socket.send(dataServer)
+            print "Data sent."
+
+

@@ -6,6 +6,8 @@ server_socket.listen(5)
 
 print "TCPServer Waiting for client on port 5005"
 
+temp = open('workfile', 'w')
+
 while 1:
 	client_socket, address = server_socket.accept()
 	print "I got a connection from ", address
@@ -17,11 +19,21 @@ while 1:
 			break;
 		else:
 			client_socket.send(data)
- 
-                data = client_socket.recv(512)
-                if ( data == 'q' or data == 'Q'):
+		print "Data sent."
+
+		dataClient = client_socket.recv(512)
+		if (dataClient == 'q' or dataClient == 'Q'):
 			client_socket.close()
+			temp.write(dataClient)
+			print "Lost connection with ", address
 			break;
 		else:
-			print "RECIEVED:" , data
-	
+			print "recevied: ", dataClient
+			temp.write(dataClient)
+
+
+
+print "The file we have written is: "
+print temp
+
+temp.close()
