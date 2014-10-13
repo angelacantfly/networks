@@ -1,5 +1,6 @@
 import sys
 
+# index must be integer
 def convertIndexToStr( index, bytes ):
     indexStr = str(index)
     numDigit = len(indexStr)
