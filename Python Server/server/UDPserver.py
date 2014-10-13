@@ -40,7 +40,7 @@ if size % BLOCK_SIZE != 0:
 # instead of sending 512, we send 408 so 4 bytes will be the index #
 # we start at -1 because the first block of the file has the file name in it
 index = -1
-
+lostPackets = []
 # Get the rest of the files
 try:
     while(data):
@@ -56,8 +56,10 @@ try:
             # if the current index does not match the one transmitted, then
             # alert the TCP helper!
             if(index != int(current_index)):
-               print "uh oh! we got a corruption :D"
-               print "enter ANGELA"
+            	for x in xrange(index,int(current_index)):
+            		lostPackets.append(x)
+            	print "uh oh! we got a corruption :D"
+               	print "enter ANGELA"
 
         # remove the filename from the header
         data = data.replace(filename, "")
@@ -74,6 +76,7 @@ except socket.timeout:
     print "File download complete! "
 
 print "( " ,address[0], " " , address[1] , " ) received: ", filename
+print "missing packets: ", lostPackets
 
 # print "UDPServer Waiting for client on port 5006"
 
