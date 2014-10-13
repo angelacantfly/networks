@@ -24,16 +24,19 @@ metaData = TCPhelpers_client.generateMetaData(fileName, buf)
 ###################################################################
 # TCP Metadata Transfer 
 ###################################################################
-message = client_socket.recv(BLOCK_SIZE) # initialization message
+# +++ Confirmation 1: established TCP connection. +++ #
+message = client_socket.recv(BLOCK_SIZE)
 print message
 if 'initialized' not in message:
-    print 'Having error initializing.'
+    print 'Having error initializing connection.'
 
+# +++ Confirmation 2: complete metadata transfer. +++ #
 needMetadata = 1
 
 while needMetadata:
     client_socket.send(str(metaData))
     needMetadata = int(client_socket.recv(BLOCK_SIZE))
+    print 'needMetadata is ', needMetadata
 ###################################################################
 
 
@@ -60,7 +63,7 @@ f = open(filename, "rb") # read binary
 
 # Read an initial amount data to buffer
 data = f.read(buf)
-print data
+# print data
 # index calculations - this is tacked to the front of data
 size = os.path.getsize(filename)
 numBlocks = size / BLOCK_SIZE

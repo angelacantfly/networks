@@ -29,6 +29,7 @@ packetSize = None
 ###################################################################
 tcp_client_socket, address = tcp_server_socket.accept()
 print "I got a connection from ", address
+# +++ Confirmation 1: established TCP connection. +++ #
 tcp_client_socket.send("Connection initialized.")
 
 needsMetaData = 1
@@ -40,6 +41,7 @@ while needsMetaData:
 	metadata = metadata[1:-1]
 	array = metadata.split(', ')
 	needsMetaData = 0
+	# +++ Confirmation 2: complete metadata transfer. +++ #
 	tcp_client_socket.send(str(needsMetaData))
 
 print 'Metadata : ', array 
@@ -164,9 +166,10 @@ try:
     			f.seek(index * buf)
     			f.write(data)
     		data,address = udp_socket.recvfrom(BLOCK_SIZE)
+    print 'waitingToComplete = 0'
+    tcp_client_socket.send('waitingToComplete = 0')
 except socket.timeout:
-	print 'waitingToComplete = 0'
-	tcp_client_socket.send('waitingToComplete = 0')
+
 	f.close()
 	udp_socket.close()
 	print "File download complete! "
