@@ -25,6 +25,8 @@ f = open(filename, "rb") # read binary
 # Read the data to buffer
 data = f.read(buf)
 
+# TODO: Attach a number to each
+# instead of sending 512, we send 408 so 4 bytes will be the index #
 while(data):
     if(client_socket.sendto(data,address)):
         print "Sending:",filename, "..."
@@ -32,31 +34,3 @@ while(data):
 
 client_socket.close()
 f.close()
-
-# while 1:
-#     data = raw_input("Type something(q or Q to exit): ")
-#     if (data != 'q' and data != 'Q'):
-#         # client_socket.send(data)
-#         client_socket.sendto(data, ("localhost",5006))
-#         # Why we are using the sendto instead of send? see comment 1 above
-#     else:
-#         break
-# client_socket.close()
-
-# prints data out twice
-# while 1:
-#     data = raw_input("Type something(q or Q to exit): ")
-#     if (data == 'q' and data == 'Q'):
-#         # client_socket.sendto(data, ("localhost",5006))
-#         client_socket.close()
-#         break;
-#     else:
-#         client_socket.send(data)
-#         if (data == 'q' and data == 'Q'):
-#             client_socket.send(data)
-#             client_socket.close()
-#             break;
-#         else:
-#             client_socket.send(data)
-
-# client_socket.close()
