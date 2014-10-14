@@ -119,20 +119,10 @@ try:
         # Get the current index from the first few characters in data block
         current_index = data[0:INDEX_SIZE]
         if (index > 0):
-        	if (index % 100 == 0) :
-	            print "The data block index is:", current_index
-	            if (index == 345):
-	            	print current_index
-			successPackets.append(index)
-			# if the current index does not match the one transmitted, then
-			# alert the TCP helper!
-			if(index != int(current_index)):
-				# for x in xrange(index,int(current_index)):
-				# 	lostPackets.append(x)
-				lostPackets.append(index)
-				# tcp_server_socket.send('Please resend packet ', index) 
-				print "uh oh! we got a corruption :D"
-				print "enter ANGELA"
+			print "The data block index is:", current_index
+			print 'Trying to conver to int, ', int(current_index)
+			successPackets.append(int(current_index))
+
 
         # remove the filename from the header
 
@@ -147,25 +137,33 @@ try:
         f.flush()
         udp_socket.settimeout(2) # Round-trip time
 
-        data,address = udp_socket.recvfrom(BLOCK_SIZE)
-        # print 'numPackets',numPackets
         if index >= numPackets:
         	break;
 
+        data,address = udp_socket.recvfrom(BLOCK_SIZE)
+        # print 'numPackets',numPackets
+
     print 'Done transfering data through udp first.'
-    # lostPackets = [2, 3, 4]
-    # resendPackets = []
-    # Determine what packets are missing
+
+
     for x in xrange(1, numPackets):
     	if x not in successPackets:
     		resendPackets.append(x)
     print 'resend the following packets: ', resendPackets
 
+    resendPackets = [123,125,69]
     while resendPackets:
 		print 'lost packets: ', resendPackets
-		tcp_client_socket.send(str(resendPackets)) # FIXME: resendPackets can be too big
+		# if len(resendPackets) < 1: 
+		# 	tcp_client_socket.send(str(resendPackets)) # FIXME: resendPackets can be too big
+		# else:
+		# 	tcp_client_socket.send(str(resendPackets[0:1]))
+		tcp_client_socket.send(str(resendPackets))
 		data,address = udp_socket.recvfrom(BLOCK_SIZE)
+
 		while data:
+			# if filename in data:
+			# 	continue
 			current_index = data[0:INDEX_SIZE]
 			index = int(current_index)
 			if index in resendPackets:
