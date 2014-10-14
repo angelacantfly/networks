@@ -77,7 +77,8 @@ index = 0
 while(data):
     index += 1
     if(udp_client_socket.sendto(convertIndex.convertIndexToStr(index, INDEX_SIZE) + data,address)):
-        print "Sending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
+        if (index % 100 == 0):
+            print "Sending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
         data = f.read(buf)
 
 udp_client_socket.close()

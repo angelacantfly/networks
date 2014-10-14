@@ -15,7 +15,6 @@ tcp_server_socket.listen(5)
 
 print "TCPServer Waiting for client on port ", portNumber
 
-temp = open('workfile', 'w')
 packets = []
 filename = None
 filesize = None
@@ -113,24 +112,29 @@ error = 0
 try:
     while data:
         index += 1
-        print "The index is:", index
+        if (index % 100 == 0):
+	        print "The index is:", index
 
         # Get the current index from the first few characters in data block
         current_index = data[0:INDEX_SIZE]
         if (index > 0):
-            print "The data block index is:", current_index
-            successPackets.append(index)
-            # if the current index does not match the one transmitted, then
-            # alert the TCP helper!
-            if(index != int(current_index)):
-            	# for x in xrange(index,int(current_index)):
-            	# 	lostPackets.append(x)
-            	lostPackets.append(index)
-            	# tcp_server_socket.send('Please resend packet ', index) 
-            	print "uh oh! we got a corruption :D"
-               	print "enter ANGELA"
+        	if (index % 100 == 0) :
+	            print "The data block index is:", current_index
+	            if (index == 345):
+	            	print current_index
+			successPackets.append(index)
+			# if the current index does not match the one transmitted, then
+			# alert the TCP helper!
+			if(index != int(current_index)):
+				# for x in xrange(index,int(current_index)):
+				# 	lostPackets.append(x)
+				lostPackets.append(index)
+				# tcp_server_socket.send('Please resend packet ', index) 
+				print "uh oh! we got a corruption :D"
+				print "enter ANGELA"
 
         # remove the filename from the header
+
         # if (index == 0):
         data = data.replace(filename, "")
 
@@ -146,30 +150,38 @@ try:
         # print 'numPackets',numPackets
         if index >= numPackets:
         	break;
+
     print 'Done transfering data through udp first.'
     # lostPackets = [2, 3, 4]
+    resendPackets = []
+    # Determine what packets are missing
+    for x in xrange(0, numPackets):
+    	if x not in successPackets:
+    		resendPackets.append(x)
 
-    while lostPackets:
-    	print 'lost packets: ', lostPackets
-    	tcp_client_socket.send(str(lostPackets)) # FIXME: lostPackets can be too big
-    	data,address = udp_socket.recvfrom(BLOCK_SIZE)
-    	while data:
-    		current_index = data[0:INDEX_SIZE]
-    		index = int(current_index)
-    		if index in lostPackets:
-    			print "The data block index is:", current_index
-    			data = data.replace(current_index,"")
-    			lostPackets.remove(int(current_index))
+	while resendPackets:
+		print 'lost packets: ', resendPackets
+		tcp_client_socket.send(str(resendPackets)) # FIXME: resendPackets can be too big
+		data,address = udp_socket.recvfrom(BLOCK_SIZE)
+		while data:
+			current_index = data[0:INDEX_SIZE]
+			index = int(current_index)
+			if index in resendPackets:
+				print "The data block index is:", current_index
+				data = data.replace(current_index,"")
+				resendPackets.remove(int(current_index))
+				print 'lost packet after update :', resendPackets
 
-    			# Go seek the file at the appropriate place
-    			# and write data to the file
-    			f.seek(index * buf)
-    			f.write(data)
-    		data,address = udp_socket.recvfrom(BLOCK_SIZE)
-    print 'waitingToComplete = 0'
-    tcp_client_socket.send('waitingToComplete = 0')
+				# Go seek the file at the appropriate place
+				# and write data to the file
+				f.seek(index * buf)
+				f.write(data)
+			if len(resendPackets) == 0:
+				print 'waitingToComplete = 0'
+				tcp_client_socket.send('waitingToComplete = 0')
+				break;
+			data,address = udp_socket.recvfrom(BLOCK_SIZE)
 except socket.timeout:
-
 	f.close()
 	udp_socket.close()
 	print "File download complete! "
@@ -180,13 +192,13 @@ except socket.timeout:
 print "( " ,address[0], " " , address[1] , " ) received: ", filename
 print "missing packets: ", lostPackets
 
-
-
 f.close()
 
-print "The file we have written is: "
-print temp
+print "The file we have written is: ", filename
 # Change file name
+try:
+	tcp_client_socket.send('waitingToComplete = 0')
+except socket.error:
+	tcp_client_socket.close()
 
-temp.close()
 tcp_server_socket.close()
