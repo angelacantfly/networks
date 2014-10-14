@@ -109,6 +109,7 @@ lostPackets = []
 successPackets = []
 # Get the rest of the files
 error = 0
+resendPackets = []
 try:
     while data:
         index += 1
@@ -153,7 +154,7 @@ try:
 
     print 'Done transfering data through udp first.'
     # lostPackets = [2, 3, 4]
-    resendPackets = []
+    # resendPackets = []
     # Determine what packets are missing
     for x in xrange(1, numPackets):
     	if x not in successPackets:
