@@ -3,6 +3,7 @@ import TCPhelpers_client
 import sys
 import os
 import convertIndex
+# test delete me
 '''
     The client send a file to the server.
 '''
@@ -22,7 +23,7 @@ client_socket.connect((serverHostName, portNumber))
 metaData = TCPhelpers_client.generateMetaData(fileName, buf)
 
 ###################################################################
-# TCP Metadata Transfer 
+# TCP Metadata Transfer
 ###################################################################
 # +++ Confirmation 1: established TCP connection. +++ #
 message = client_socket.recv(BLOCK_SIZE)
@@ -93,14 +94,14 @@ udp_client_socket.sendto(filename, address)
 waitingToComplete = 1
 listString = client_socket.recv(BLOCK_SIZE)
 while waitingToComplete:
-    
+
     # print 'received list: ', listString
     # Test if the transfer is actually complete
     if 'waitingToComplete' in listString and '0' in listString:
         print 'Transfer complete, no more lost packets.'
         waitingToComplete = 0
         break;
-    
+
     # Parse list of lost packets being transfered
     listString = listString.replace("\'", "")
     listString = listString[1:-1]
