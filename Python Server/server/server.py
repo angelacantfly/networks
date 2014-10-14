@@ -1,8 +1,9 @@
 import socket
 import sys
 import os
+import ast
 '''
-    The serve receives a file from a client.
+	The serve receives a file from a client.
 '''
 BLOCK_SIZE = 512
 METADATA_SIZE = 5
@@ -24,7 +25,7 @@ packetSize = None
 
 
 ###################################################################
-# TCP Metadata Transfer 
+# TCP Metadata Transfer
 ###################################################################
 tcp_client_socket, address = tcp_server_socket.accept()
 print "I got a connection from ", address
@@ -43,7 +44,7 @@ while needsMetaData:
 	# +++ Confirmation 2: complete metadata transfer. +++ #
 	tcp_client_socket.send(str(needsMetaData))
 
-print 'Metadata : ', array 
+print 'Metadata : ', array
 
 for data in array:
 	data = data.split(':')
@@ -64,7 +65,7 @@ for data in array:
 		print 'packetSize: ',packetSize
 
 # Confirmation for client that the metadata transfer is complete
-tcp_client_socket.send('0')
+# tcp_client_socket.send('0')
 # tcp_server_socket.close()
 print 'Done with metadata.'
 ###################################################################
@@ -100,7 +101,7 @@ f = open(filename, 'w')
 size = os.path.getsize(filename)
 numBlocks = size / BLOCK_SIZE
 if size % BLOCK_SIZE != 0:
-    numBlocks += 1
+	numBlocks += 1
 
 # instead of sending 512, we send 408 so 4 bytes will be the index #
 # we start at -1 because the first block of the file has the file name in it
@@ -111,83 +112,97 @@ successPackets = []
 error = 0
 resendPackets = []
 try:
-    while data:
-        index += 1
-        if (index % 100 == 0):
-	        print "The index is:", index
+	while data:
+		index += 1
+		if (index % 10000 == 0):
+			print "The index is:", index
 
-        # Get the current index from the first few characters in data block
-        current_index = data[0:INDEX_SIZE]
-        if (index > 0):
-			print "The data block index is:", current_index
-			print 'Trying to conver to int, ', int(current_index)
+		# Get the current index from the first few characters in data block
+		current_index = data[0:INDEX_SIZE]
+		if (index > 0):
+			#print "The data block index is:", current_index
 			successPackets.append(int(current_index))
 
 
-        # remove the filename from the header
+		# remove the filename from the header
 
-        # if (index == 0):
-        data = data.replace(filename, "")
+		# if (index == 0):
+		data = data.replace(filename, "")
 
-        # replace the header of the blocks.
-        data = data.replace(current_index,"")
-        # print data
+		# replace the header of the blocks.
+		data = data.replace(current_index,"")
+		# print data
+		if (index > 0):
+			current_index = int(current_index)
+			f.seek(buf*(current_index-1))
+			f.write(data)
+			f.flush()
+		udp_socket.settimeout(50) # Round-trip time
 
-        f.write(data)
-        f.flush()
-        udp_socket.settimeout(2) # Round-trip time
+		if index > 0 and int(current_index) >= numPackets:
+			break;
 
-        if index >= numPackets:
-        	break;
+		data,address = udp_socket.recvfrom(BLOCK_SIZE)
+		# print 'numPackets',numPackets
 
-        data,address = udp_socket.recvfrom(BLOCK_SIZE)
-        # print 'numPackets',numPackets
+	print 'Done transfering data through udp first.'
+except socket.timeout:
+	print 'time out index: ', index
+	print "File download complete! "
 
-    print 'Done transfering data through udp first.'
+for x in xrange(1, numPackets):
+	if x not in successPackets:
+		resendPackets.append(x)
+		if (x % 10000 == 0):
+			print 'xrange : ', x
+print 'resend the following packets: ', resendPackets
 
-
-    for x in xrange(1, numPackets):
-    	if x not in successPackets:
-    		resendPackets.append(x)
-    print 'resend the following packets: ', resendPackets
-
-    #resendPackets = [123,125,69]
-    while resendPackets:
+#resendPackets = [123,125,69]
+try:
+	while resendPackets:
 		print 'lost packets: ', resendPackets
-		# if len(resendPackets) < 1: 
-		# 	tcp_client_socket.send(str(resendPackets)) # FIXME: resendPackets can be too big
-		# else:
-		# 	tcp_client_socket.send(str(resendPackets[0:1]))
-		tcp_client_socket.send(str(resendPackets))
+		windowSize = 50
+		arrayChunk = []
+		if len(resendPackets) < windowSize:
+			arrayChunk = resendPackets
+		else:
+			arrayChunk = resendPackets[:windowSize]
+		# print str(arrayChunk)
+		tcp_client_socket.send(str(arrayChunk))
 		data,address = udp_socket.recvfrom(BLOCK_SIZE)
 
 		while data:
 			# if filename in data:
 			# 	continue
-			current_index = data[0:INDEX_SIZE]
+			print 'arrayChunk: ', arrayChunk
+			current_index = data[:INDEX_SIZE]
 			index = int(current_index)
 			if index in resendPackets:
 				print "The data block index is:", current_index
 				data = data.replace(current_index,"")
-				resendPackets.remove(int(current_index))
+				resendPackets.remove(index)
+				if index in arrayChunk:
+					arrayChunk.remove(index)
 				print 'lost packet after update :', resendPackets
 
 				# Go seek the file at the appropriate place
 				# and write data to the file
-				f.seek(index * buf)
+				f.seek((index-1) * buf)
 				f.write(data)
-			if len(resendPackets) == 0:
-				print 'waitingToComplete = 0'
-				tcp_client_socket.send('waitingToComplete = 0')
+			# if len(resendPackets) == 0:
+			# 	print 'waitingToComplete = 0'
+			# 	tcp_client_socket.send('waitingToComplete = 0')
+			# 	break;
+			if not arrayChunk:
 				break;
 			data,address = udp_socket.recvfrom(BLOCK_SIZE)
 except socket.timeout:
-	f.close()
-	udp_socket.close()
-	print "File download complete! "
+	print 'time out with resendPackets, ', resendPackets
+	print 'Done making shit up.'
 
 
 
+udp_socket.close()
 
 print "( " ,address[0], " " , address[1] , " ) received: ", filename
 print "missing packets: ", resendPackets

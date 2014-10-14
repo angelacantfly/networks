@@ -3,6 +3,7 @@ import TCPhelpers_client
 import sys
 import os
 import convertIndex
+import ast
 '''
     The client send a file to the server.
 '''
@@ -22,7 +23,7 @@ client_socket.connect((serverHostName, portNumber))
 metaData = TCPhelpers_client.generateMetaData(fileName, buf)
 
 ###################################################################
-# TCP Metadata Transfer 
+# TCP Metadata Transfer
 ###################################################################
 # +++ Confirmation 1: established TCP connection. +++ #
 message = client_socket.recv(BLOCK_SIZE)
@@ -77,7 +78,7 @@ index = 0
 while(data):
     index += 1
     if(udp_client_socket.sendto(convertIndex.convertIndexToStr(index, INDEX_SIZE) + data,address)):
-        print "Sending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
+        #print "Sending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
         data = f.read(buf)
 
 
@@ -90,27 +91,30 @@ while(data):
 
 waitingToComplete = 1
 listString = client_socket.recv(BLOCK_SIZE)
+print 'Before waitingToComplete : ', listString
 while waitingToComplete:
-    
+
     # print 'received list: ', listString
     # Test if the transfer is actually complete
-    if 'waitingToComplete' in listString and '0' in listString:
+    if 'waitingToComplete' in listString:
         print 'Transfer complete, no more lost packets.'
         waitingToComplete = 0
         break;
-    
+
     # Parse list of lost packets being transfered
-    listString = listString.replace("\'", "")
-    listString = listString[1:-1]
-    lostPackets = listString.split(',')
-    if '' in lostPackets:
-        lostPackets.remove('')
+    # listString = listString.replace("\'", "")
+    # listString = listString[2:-1]
+    # lostPackets = listString.split(',')
+    print listString
+    lostPackets = ast.literal_eval(listString)
+    # if '' in lostPackets:
+    #     lostPackets.remove('')
     if lostPackets:
         print 'Lost packets: ', lostPackets
         for index in lostPackets:
-            index = index.strip(' ')
-            index = int(index)
-            f.seek(buf * index)
+            # index = index.strip(' ')
+            # index = int(index)
+            f.seek(buf * (index-1))
             data = f.read(buf)
             if (udp_client_socket.sendto(convertIndex.convertIndexToStr(index, INDEX_SIZE) + data,address)):
                 print "Resending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
