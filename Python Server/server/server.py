@@ -160,7 +160,7 @@ try:
     		resendPackets.append(x)
     print 'resend the following packets: ', resendPackets
 
-	while resendPackets:
+    while resendPackets:
 		print 'lost packets: ', resendPackets
 		tcp_client_socket.send(str(resendPackets)) # FIXME: resendPackets can be too big
 		data,address = udp_socket.recvfrom(BLOCK_SIZE)
