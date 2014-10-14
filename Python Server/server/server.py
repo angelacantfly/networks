@@ -151,7 +151,7 @@ try:
     		resendPackets.append(x)
     print 'resend the following packets: ', resendPackets
 
-    resendPackets = [123,125,69]
+    #resendPackets = [123,125,69]
     while resendPackets:
 		print 'lost packets: ', resendPackets
 		# if len(resendPackets) < 1: 

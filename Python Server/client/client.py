@@ -59,11 +59,11 @@ filename = sys.argv[3]
 udp_client_socket.sendto(filename, address)
 
 # Open a file with the name of the transmitted file to read
-f = open(filename, "rb") # read binary
+f = open(filename, 'r') # read binary
 
 # Read an initial amount data to buffer
 data = f.read(buf)
-# print data
+
 # index calculations - this is tacked to the front of data
 size = os.path.getsize(filename)
 numBlocks = size / BLOCK_SIZE
@@ -77,18 +77,16 @@ index = 0
 while(data):
     index += 1
     if(udp_client_socket.sendto(convertIndex.convertIndexToStr(index, INDEX_SIZE) + data,address)):
-        if (index % 100 == 0):
-            print "Sending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
+        print "Sending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
         data = f.read(buf)
 
-udp_client_socket.close()
+
 ###################################################################
 
 ###################################################################
 # Retransfering lost packets
 ###################################################################
-udp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-udp_client_socket.sendto(filename, address)
+
 
 waitingToComplete = 1
 listString = client_socket.recv(BLOCK_SIZE)
@@ -110,12 +108,14 @@ while waitingToComplete:
     if lostPackets:
         print 'Lost packets: ', lostPackets
         for index in lostPackets:
+            index = index.strip(' ')
             index = int(index)
             f.seek(buf * index)
             data = f.read(buf)
             if (udp_client_socket.sendto(convertIndex.convertIndexToStr(index, INDEX_SIZE) + data,address)):
                 print "Resending:",filename, "... index:", convertIndex.convertIndexToStr(index, INDEX_SIZE)
     listString = client_socket.recv(BLOCK_SIZE)
+
 
 ###################################################################
 
