@@ -155,9 +155,10 @@ try:
     # lostPackets = [2, 3, 4]
     resendPackets = []
     # Determine what packets are missing
-    for x in xrange(0, numPackets):
+    for x in xrange(1, numPackets):
     	if x not in successPackets:
     		resendPackets.append(x)
+    print 'resend the following packets: ', resendPackets
 
 	while resendPackets:
 		print 'lost packets: ', resendPackets
@@ -190,7 +191,7 @@ except socket.timeout:
 
 
 print "( " ,address[0], " " , address[1] , " ) received: ", filename
-print "missing packets: ", lostPackets
+print "missing packets: ", resendPackets
 
 f.close()
 
